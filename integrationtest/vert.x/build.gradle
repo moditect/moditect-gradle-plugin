@@ -1,0 +1,206 @@
+plugins{
+    id "java"
+    id "application"
+    id "org.moditect.gradleplugin"
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = "org.moditect"
+version = "2.0.0"
+
+targetCompatibility = JavaVersion.VERSION_1_9
+sourceCompatibility = JavaVersion.VERSION_1_9
+
+ext {
+    moduleName = 'com.example'
+
+    vertxVersion = '3.5.0'
+    nettyVersion = '4.1.15.Final'
+    jacksonVersion ='2.9.0'
+}
+
+mainClassName = 'com.example.HelloWorldServer'
+jar {
+    manifest {
+        attributes("Automatic-Module-Name": moduleName)
+    }
+}
+
+dependencies{
+    compile "io.vertx:vertx-core:$vertxVersion"
+}
+
+moditect {
+    addMainModuleInfo {
+        version = project.version
+        overwriteExistingFiles = false
+        jdepsExtraArgs = ['-q']
+        module {
+            mainClass = mainClassName
+            moduleInfo {
+                name = moduleName
+                exports = 'com.example to io.vertx.core;'
+            }
+        }
+    }
+    addDependenciesModuleInfo {
+        jdepsExtraArgs = ['-q']
+        modules {
+            module {
+                artifact "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+                moduleInfo {
+                    name = 'com.fasterxml.jackson.core'
+                }
+            }
+            module {
+                artifact "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+                moduleInfo {
+                    name = 'com.fasterxml.jackson.annotations'
+                }
+            }
+            module {
+                artifact "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+                moduleInfo {
+                    name = 'com.fasterxml.jackson.databind'
+                }
+            }
+            module {
+                artifact "io.netty:netty-common:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.common'
+                }
+            }
+            module {
+                artifact "io.netty:netty-buffer:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.buffer'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec'
+                }
+            }
+            module {
+                artifact "io.netty:netty-resolver:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.resolver'
+                }
+            }
+            module {
+                artifact "io.netty:netty-transport:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.transport'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec-dns:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.dns'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec-http2:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.http2'
+                }
+            }
+            module {
+                artifact "io.netty:netty-resolver-dns:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.resolver.dns'
+                }
+            }
+            module {
+                artifact "io.netty:netty-transport-native-unix-common:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.channel.unix'
+                }
+            }
+            module {
+                artifact "io.netty:netty-transport-native-epoll:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.channel.epoll'
+                }
+
+            }
+            module {
+                artifact "io.netty:netty-transport-native-kqueue:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.channel.kqueue'
+                }
+            }
+            module {
+                artifact "io.netty:netty-handler:$nettyVersion"
+                moduleInfoSource = '''
+                    module io.netty.handler {
+                        exports io.netty.handler.flow;
+                        exports io.netty.handler.flush;
+                        exports io.netty.handler.ipfilter;
+                        exports io.netty.handler.logging;
+                        exports io.netty.handler.ssl;
+                        exports io.netty.handler.ssl.ocsp;
+                        exports io.netty.handler.ssl.util;
+                        exports io.netty.handler.stream;
+                        exports io.netty.handler.timeout;
+                        exports io.netty.handler.traffic;
+                    }
+                '''
+            }
+            module {
+                artifact "io.netty:netty-codec-socks:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.socks'
+                }
+            }
+            module {
+                artifact "io.netty:netty-handler-proxy:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.handler.proxy'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec-http:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.http'
+                }
+            }
+            module {
+                artifact "io.vertx:vertx-core:$vertxVersion"
+                moduleInfo {
+                    name = 'io.vertx.core'
+                    requires = '''
+                        static log4j.api;
+                        static log4j;
+                        static slf4j.api;
+                        *;
+                    '''
+                    exports = '''
+                        !*impl*;
+                        *;
+                    '''
+                    uses = '''
+                        io.vertx.core.spi.VertxFactory;
+                        io.vertx.core.spi.VerticleFactory;
+                        io.vertx.core.spi.FutureFactory;
+                        io.vertx.core.spi.BufferFactory;
+                    '''
+                }
+            }
+        }
+    }
+    createRuntimeImage {
+        outputDirectory = file("$buildDir/jlink-image")
+        modules = ['com.example']
+        launcher {
+            name = 'helloWorld'
+            module = 'com.example'
+        }
+        compression = 2
+        stripDebug = true
+    }
+}
