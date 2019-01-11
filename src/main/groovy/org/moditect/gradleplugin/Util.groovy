@@ -17,6 +17,7 @@ package org.moditect.gradleplugin
 
 import com.google.gradle.osdetector.OsDetector
 import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -26,6 +27,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
+import org.gradle.util.ConfigureUtil
 import org.gradle.util.GradleVersion
 import org.moditect.commands.GenerateModuleInfo
 import org.moditect.gradleplugin.common.ArtifactDescriptor
@@ -36,7 +38,6 @@ import org.moditect.model.DependencyDescriptor
 import org.moditect.model.GeneratedModuleInfo
 import org.moditect.model.PackageNamePattern
 
-import java.lang.module.ModuleFinder
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -140,5 +141,15 @@ class Util {
             classifier = classifier.replace('${os.detected.arch}', os.arch)
         }
         classifier
+    }
+
+    static void executeActionOrClosure(Object target, Object actionOrClosure) {
+        if(actionOrClosure instanceof Closure) {
+            ConfigureUtil.configure((Closure)actionOrClosure, target)
+        } else if(actionOrClosure instanceof Action) {
+            ((Action)actionOrClosure).execute(target)
+        } else {
+            throw new IllegalArgumentException("Action or Closure expected but was: $actionOrClosure")
+        }
     }
 }

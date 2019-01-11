@@ -35,12 +35,25 @@ class ModitectPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.configurations.create(FULL_CONFIGURATION_NAME)
+        project.configurations.maybeCreate(FULL_CONFIGURATION_NAME)
         def ext = project.extensions.create(EXTENSION_NAME, ModitectExtension, project)
+
         def addMainModuleInfoTask = project.tasks.create(ADD_MAIN_MODULE_INFO_TASK_NAME, AddMainModuleInfoTask)
+        addMainModuleInfoTask.group = 'moditect'
+        addMainModuleInfoTask.description = 'Adds a module descriptor to the project JAR'
+
         def addDependenciesModuleInfoTask = project.tasks.create(ADD_DEPENDENCIES_MODULE_INFO_TASK_NAME, AddDependenciesModuleInfoTask)
+        addDependenciesModuleInfoTask.group = 'moditect'
+        addDependenciesModuleInfoTask.description = 'Adds module descriptors to existing JAR files'
+
         def generateModuleInfoTask = project.tasks.create(GENERATE_MODULE_INFO_TASK_NAME, GenerateModuleInfoTask)
+        generateModuleInfoTask.group = 'moditect'
+        generateModuleInfoTask.description = 'Generates module descriptors'
+
         def createRuntimeImageTask = project.tasks.create(CREATE_RUNTIME_TASK_NAME, CreateRuntimeImageTask)
+        createRuntimeImageTask.group = 'moditect'
+        createRuntimeImageTask.description = 'Creates a custom runtime image'
+
         ext.init(
                 addMainModuleInfoTask,
                 addDependenciesModuleInfoTask,

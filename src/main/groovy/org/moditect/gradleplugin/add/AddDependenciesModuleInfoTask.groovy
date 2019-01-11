@@ -17,6 +17,7 @@ package org.moditect.gradleplugin.add
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
@@ -27,8 +28,6 @@ import org.moditect.commands.AddModuleInfo
 import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.add.model.ModuleConfiguration
 import org.moditect.gradleplugin.common.ModuleId
-
-import static org.gradle.util.ConfigureUtil.configure
 
 @CompileStatic
 class AddDependenciesModuleInfoTask extends AbstractAddModuleInfoTask {
@@ -51,23 +50,37 @@ class AddDependenciesModuleInfoTask extends AbstractAddModuleInfoTask {
         }
 
         ModuleConfiguration module(Closure closure) {
+            doModule(closure)
+        }
+        ModuleConfiguration module(Action<ModuleConfiguration> action) {
+            doModule(action)
+        }
+        private ModuleConfiguration doModule(Object actionOrClosure) {
             int index = moduleConfigurations.size()
-            def moduleCfg = new ModuleConfiguration(project, index, closure)
+            def moduleCfg = new ModuleConfiguration(project, index)
             moduleConfigurations.add(moduleCfg)
+
+            LOGGER.info "Calling action of $moduleCfg.shortName"
+            Util.executeActionOrClosure(moduleCfg, actionOrClosure)
             LOGGER.info "moduleCfg #$index: $moduleCfg"
             moduleCfg
         }
     }
 
     AddDependenciesModuleInfoTask() {
-        description = 'Adds module descriptors to existing JAR files'
         modules = project.objects.property(ModuleList)
         modules.set(new ModuleList(project))
     }
 
-    void modules(Closure modulesClosure) {
-        LOGGER.info "calling modules()"
-        configure(modulesClosure, modules.get())
+    void modules(Closure closure) {
+        doModules(closure)
+    }
+    void modules(Action<ModuleList> action) {
+        doModules(action)
+    }
+    private void doModules(Object actionOrClosure) {
+        LOGGER.debug "calling modules()"
+        Util.executeActionOrClosure(modules.get(), actionOrClosure)
     }
 
     @TaskAction

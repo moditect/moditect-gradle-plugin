@@ -16,8 +16,11 @@
 package org.moditect.gradleplugin.image
 
 import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -26,15 +29,16 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.moditect.commands.CreateRuntimeImage
 import org.moditect.gradleplugin.ModitectLog
-import org.moditect.gradleplugin.ModitectPlugin
+import org.moditect.gradleplugin.Util
 
 import java.nio.file.Path
 
-import static org.gradle.util.ConfigureUtil.configure
 import static org.moditect.gradleplugin.Util.createDirectoryProperty
 
 @CompileStatic
 class CreateRuntimeImageTask extends DefaultTask {
+    private static final Logger LOGGER = Logging.getLogger(CreateRuntimeImageTask)
+
     @Input @Optional
     final Property<String> jdkHome
 
@@ -68,9 +72,6 @@ class CreateRuntimeImageTask extends DefaultTask {
     }
 
     CreateRuntimeImageTask() {
-        description = 'Creates a custom runtime image'
-        group = 'moditect'
-
         jdkHome = project.objects.property(String)
 
         outputDirectory = createDirectoryProperty(project)
@@ -124,6 +125,13 @@ class CreateRuntimeImageTask extends DefaultTask {
     }
 
     void launcher(Closure closure) {
-        configure(closure, launcher.get())
+        doLauncher(closure)
+    }
+    void launcher(Action<Launcher> action) {
+        doLauncher(action)
+    }
+    private void doLauncher(Object actionOrClosure) {
+        LOGGER.debug "calling launcher()"
+        Util.executeActionOrClosure(launcher.get(), actionOrClosure)
     }
 }

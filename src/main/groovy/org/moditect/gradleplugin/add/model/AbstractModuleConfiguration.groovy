@@ -16,16 +16,14 @@
 package org.moditect.gradleplugin.add.model
 
 import groovy.transform.CompileStatic
-import groovy.transform.ToString
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.common.ModuleId
 import org.moditect.gradleplugin.common.ModuleInfoConfiguration
 
-import static org.gradle.util.ConfigureUtil.configure
-
 @CompileStatic
-@ToString(includeNames = true)
 abstract class AbstractModuleConfiguration implements Serializable {
     transient protected final Project project
 
@@ -43,15 +41,26 @@ abstract class AbstractModuleConfiguration implements Serializable {
         this.project = project
     }
 
-    void moduleInfo(Closure configureClosure) {
+    void moduleInfo(Closure closure) {
+        doModuleInfo(closure)
+    }
+    void moduleInfo(Action<ModuleInfoConfiguration> action) {
+        doModuleInfo(action)
+    }
+    private void doModuleInfo(Object actionOrClosure) {
         if(moduleInfo) throw new GradleException("Multiple moduleInfo() calls in $shortName")
         moduleInfo = new ModuleInfoConfiguration()
-        configure(configureClosure, moduleInfo)
+        Util.executeActionOrClosure(moduleInfo, actionOrClosure)
     }
 
     void checkModuleInfo() {
         if([moduleInfo, moduleInfoSource, moduleInfoFile].count { it != null } != 1) {
             throw new GradleException("Exactly one of 'moduleInfo', 'moduleInfoSource', or 'moduleInfoFile' must be specified in $shortName")
         }
+    }
+
+    @Override
+    String toString() {
+        shortName
     }
 }
