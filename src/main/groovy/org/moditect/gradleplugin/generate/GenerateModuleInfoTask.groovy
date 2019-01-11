@@ -16,6 +16,7 @@
 package org.moditect.gradleplugin.generate
 
 import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
@@ -24,12 +25,10 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.moditect.gradleplugin.ModitectExtension
 import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.common.ModuleId
 import org.moditect.gradleplugin.generate.model.ModuleConfiguration
 
-import static org.gradle.util.ConfigureUtil.configure
 import static org.moditect.gradleplugin.Util.createDirectoryProperty
 
 @CompileStatic
@@ -61,18 +60,23 @@ class GenerateModuleInfoTask extends DefaultTask {
         }
 
         ModuleConfiguration module(Closure closure) {
+            doModule(closure)
+        }
+        ModuleConfiguration module(Action<ModuleConfiguration> action) {
+            doModule(action)
+        }
+        private ModuleConfiguration doModule(Object actionOrClosure) {
             int index = moduleConfigurations.size()
-            def moduleCfg = new ModuleConfiguration(project, index, closure)
+            def moduleCfg = new ModuleConfiguration(project, index)
             moduleConfigurations.add(moduleCfg)
+            LOGGER.info "Calling action of $moduleCfg.shortName"
+            Util.executeActionOrClosure(moduleCfg, actionOrClosure)
             LOGGER.info "moduleCfg #$index: $moduleCfg"
             moduleCfg
         }
     }
 
     GenerateModuleInfoTask() {
-        description = 'Generates module descriptors'
-        group = 'moditect'
-
         workingDirectory = createDirectoryProperty(project)
 
         outputDirectory = createDirectoryProperty(project)
@@ -84,9 +88,15 @@ class GenerateModuleInfoTask extends DefaultTask {
         jdepsExtraArgs = project.objects.listProperty(String)
     }
 
-    void modules(Closure modulesClosure) {
-        LOGGER.info "calling modules()"
-        configure(modulesClosure, modules.get())
+    void modules(Closure closure) {
+        doModules(closure)
+    }
+    void modules(Action<ModuleList> action) {
+        doModules(action)
+    }
+    private void doModules(Object actionOrClosure) {
+        LOGGER.debug "calling modules()"
+        Util.executeActionOrClosure(modules.get(), actionOrClosure)
     }
 
     @TaskAction

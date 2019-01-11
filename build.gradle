@@ -5,36 +5,18 @@ plugins {
     id "com.github.hierynomus.license" version "0.14.0"
 }
 
-group = 'org.moditect'
-version = '1.0.0-SNAPSHOT'
-
 repositories {
-    mavenCentral()
     jcenter()
     gradlePluginPortal()
-    flatDir {
-        dirs "${rootProject.projectDir}/lib"
-    }
+    maven { url 'https://jitpack.io' }
 }
 
 sourceCompatibility = 1.8
 
 def defaultEncoding = 'UTF-8'
 [compileJava, compileTestJava]*.options*.encoding = defaultEncoding
-
 [compileGroovy, compileTestGroovy]*.options*.encoding = defaultEncoding
 [compileGroovy, compileTestGroovy]*.groovyOptions*.encoding = defaultEncoding
-
-sourceSets.main.java.srcDirs = []
-sourceSets.main.groovy.srcDirs = ["src/main/java", "src/main/groovy"]
-
-configurations {
-    compile {transitive = true}
-}
-
-ext {
-    aetherVersion = '1.1.0'
-}
 
 dependencies {
     implementation gradleTestKit()
@@ -42,10 +24,7 @@ dependencies {
 
     implementation "gradle.plugin.com.google.gradle:osdetector-gradle-plugin:1.6.1"
 
-    // TODO - use the artifact from Maven Central when it becomes available
-    implementation 'com.github.moditect:moditect:1.0.0.Local'
-    implementation 'com.github.javaparser:javaparser-core:3.5.0'
-    // implementation 'com.github.moditect:moditect:1.0.0'
+    implementation 'com.github.beryx:moditect:jitpack-SNAPSHOT'
 
     implementation 'org.apache.maven:maven-aether-provider:3.3.9'
     implementation "org.eclipse.aether:aether-connector-basic:$aetherVersion"

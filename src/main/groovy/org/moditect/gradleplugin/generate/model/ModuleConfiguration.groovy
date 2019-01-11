@@ -16,7 +16,7 @@
 package org.moditect.gradleplugin.generate.model
 
 import groovy.transform.CompileStatic
-import groovy.transform.ToString
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -30,10 +30,7 @@ import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.common.ModuleId
 import org.moditect.gradleplugin.common.ModuleInfoConfiguration
 
-import static org.gradle.util.ConfigureUtil.configure
-
 @CompileStatic
-@ToString(includeNames = true)
 class ModuleConfiguration {
     private static final Logger LOGGER = Logging.getLogger(ModuleConfiguration)
 
@@ -49,17 +46,20 @@ class ModuleConfiguration {
 
     final Set<Dependency> additionalDependencies = []
 
-    ModuleConfiguration(Project project, int index, Closure closure) {
+    ModuleConfiguration(Project project, int index) {
         this.project = project
         this.index = index
-
-        LOGGER.info "Calling closure of $shortName"
-        configure(closure, this)
     }
 
     Dependency artifact(Object dependencyNotation, Closure closure) {
+        doArtifact(dependencyNotation, closure)
+    }
+    Dependency artifact(Object dependencyNotation, Action<Dependency> action) {
+        doArtifact(dependencyNotation, action)
+    }
+    private Dependency doArtifact(Object dependencyNotation, Object actionOrClosure) {
         Dependency dependency = artifact(dependencyNotation)
-        configure(closure, dependency)
+        Util.executeActionOrClosure(dependency, actionOrClosure)
         dependency
     }
 
@@ -115,8 +115,14 @@ class ModuleConfiguration {
     }
 
     Dependency additionalDependency(Object dependencyNotation, Closure closure) {
+        doAdditionalDependency(dependencyNotation, closure)
+    }
+    Dependency additionalDependency(Object dependencyNotation, Action<Dependency> action) {
+        doAdditionalDependency(dependencyNotation, action)
+    }
+    private Dependency doAdditionalDependency(Object dependencyNotation, Object actionOrClosure) {
         def dependency = additionalDependency(dependencyNotation)
-        configure(closure, dependency)
+        Util.executeActionOrClosure(dependency, actionOrClosure)
         dependency
     }
 
@@ -127,8 +133,15 @@ class ModuleConfiguration {
         dep
     }
 
-    void moduleInfo(Closure configureClosure) {
-        configure(configureClosure, moduleInfo)
+    void moduleInfo(Closure closure) {
+        doModuleInfo(closure)
+    }
+    void moduleInfo(Action<ModuleInfoConfiguration> action) {
+        doModuleInfo(action)
+    }
+    void doModuleInfo(Object actionOrClosure) {
+        LOGGER.debug "calling moduleInfo()"
+        Util.executeActionOrClosure(moduleInfo, actionOrClosure)
     }
 
     String getShortName() {
@@ -153,5 +166,10 @@ class ModuleConfiguration {
         LOGGER.info "optionalModuleIds: $optionalModuleIds"
         return optionalModuleIds
 
+    }
+
+    @Override
+    String toString() {
+        shortName
     }
 }

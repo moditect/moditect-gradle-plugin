@@ -16,6 +16,7 @@
 package org.moditect.gradleplugin
 
 import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
@@ -31,7 +32,6 @@ import org.moditect.gradleplugin.generate.GenerateModuleInfoTask
 import org.moditect.gradleplugin.image.CreateRuntimeImageTask
 import org.moditect.model.DependencyDescriptor
 
-import static org.gradle.util.ConfigureUtil.configure
 import static org.moditect.gradleplugin.Util.createDirectoryProperty
 
 @CompileStatic
@@ -123,19 +123,19 @@ class ModitectExtension {
     }
 
 
-    void addMainModuleInfoData(Closure closure) {
-        configure(closure, addMainModuleInfoTask)
+    void addMainModuleInfoData(Action<AddMainModuleInfoTask> action) {
+        action.execute(addMainModuleInfoTask)
     }
 
-    void addDependenciesModuleInfo(Closure closure) {
-        configure(closure, addDependenciesModuleInfoTask)
+    void addDependenciesModuleInfo(Action<AddDependenciesModuleInfoTask> action) {
+        action.execute(addDependenciesModuleInfoTask)
     }
 
-    void generateModuleInfo(Closure closure) {
-        configure(closure, generateModuleInfoTask)
+    void generateModuleInfo(Action<GenerateModuleInfoTask> action) {
+        action.execute(generateModuleInfoTask)
     }
 
-    void createRuntimeImage(Closure closure) {
-        configure(closure, createRuntimeImageTask)
+    void createRuntimeImage(Action<CreateRuntimeImageTask> action) {
+        action.execute(createRuntimeImageTask)
     }
 }

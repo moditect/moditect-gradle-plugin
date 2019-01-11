@@ -18,7 +18,6 @@ package org.moditect.gradleplugin.add.model
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.jvm.tasks.Jar
 import org.moditect.gradleplugin.common.ModuleId

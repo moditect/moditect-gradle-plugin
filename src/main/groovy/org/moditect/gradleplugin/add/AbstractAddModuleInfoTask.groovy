@@ -23,20 +23,19 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
-import org.moditect.gradleplugin.ModitectExtension
 import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.add.model.AbstractModuleConfiguration
-import org.moditect.gradleplugin.add.model.ModuleConfiguration
-import org.moditect.gradleplugin.common.ModuleId
 import org.moditect.model.GeneratedModuleInfo
 
 import static org.moditect.gradleplugin.Util.createDirectoryProperty
 
 @CompileStatic
+@CacheableTask
 abstract class AbstractAddModuleInfoTask extends DefaultTask {
     private static final Logger LOGGER = Logging.getLogger(AbstractAddModuleInfoTask)
 
@@ -59,8 +58,6 @@ abstract class AbstractAddModuleInfoTask extends DefaultTask {
     final Property<Boolean> overwriteExistingFiles
 
     AbstractAddModuleInfoTask() {
-        group = 'moditect'
-
         workingDirectory = createDirectoryProperty(project)
 
         outputDirectory = createDirectoryProperty(project)
