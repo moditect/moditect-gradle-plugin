@@ -23,9 +23,12 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.moditect.commands.CreateRuntimeImage
 import org.moditect.gradleplugin.ModitectLog
@@ -42,10 +45,10 @@ class CreateRuntimeImageTask extends DefaultTask {
     @Input @Optional
     final Property<String> jdkHome
 
-    @OutputDirectory
+    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
     final DirectoryProperty outputDirectory
 
-    @Input
+    @Classpath @PathSensitive(PathSensitivity.RELATIVE)
     final ListProperty<File> modulePath
 
     @Input

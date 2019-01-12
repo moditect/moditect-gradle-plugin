@@ -18,7 +18,7 @@ package org.moditect.gradleplugin.common
 import groovy.transform.Canonical
 
 @Canonical
-class ModuleId {
+class ModuleId implements Serializable {
     String group
     String name
 }
