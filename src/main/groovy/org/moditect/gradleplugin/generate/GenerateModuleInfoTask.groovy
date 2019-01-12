@@ -35,24 +35,22 @@ import static org.moditect.gradleplugin.Util.createDirectoryProperty
 class GenerateModuleInfoTask extends DefaultTask {
     private static final Logger LOGGER = Logging.getLogger(GenerateModuleInfoTask)
 
-    @OutputDirectory
+    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
     final DirectoryProperty workingDirectory
 
-    @OutputDirectory
+    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
     final DirectoryProperty outputDirectory
 
     @Input @Optional
     final ListProperty<String> jdepsExtraArgs
 
-    // TODO - make ModuleConfiguration serializable and annotate with @Input
-    @Internal
+    @Nested
     final Property<ModuleList> modules
 
-    @Internal
-    @Lazy volatile Map<ModuleId, String> assignedNamesByModules = { retrieveAssignedNamesByModules() }()
+    static class ModuleList {
+        private final Project project
 
-    static class ModuleList implements Serializable {
-        transient private final Project project
+        @Nested
         final List<ModuleConfiguration> moduleConfigurations = []
 
         ModuleList(Project project) {
@@ -122,6 +120,17 @@ class GenerateModuleInfoTask extends DefaultTask {
         }
     }
 
+    private volatile Map<ModuleId, String> cachedAssignedNamesByModules
+    @Internal Map<ModuleId, String> getAssignedNamesByModules () {
+        if(!cachedAssignedNamesByModules) {
+            synchronized (this) {
+                if(!cachedAssignedNamesByModules) {
+                    cachedAssignedNamesByModules = retrieveAssignedNamesByModules()
+                }
+            }
+        }
+        cachedAssignedNamesByModules
+    }
     private Map<ModuleId, String> retrieveAssignedNamesByModules() {
         Map<ModuleId, String> assignedNamesByModule = [:]
         for (ModuleConfiguration moduleCfg : modules.get().moduleConfigurations) {

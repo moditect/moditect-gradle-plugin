@@ -25,6 +25,11 @@ import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.moditect.gradleplugin.ModitectPlugin
 import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.common.ModuleId
@@ -39,11 +44,14 @@ class ModuleConfiguration {
     private final Project project
     private final int index
 
+    @Internal
     Dependency primaryDependency
     private Configuration primaryConfig
 
+    @Internal
     final ModuleInfoConfiguration moduleInfo = new ModuleInfoConfiguration()
 
+    @Internal
     final Set<Dependency> additionalDependencies = []
 
     ModuleConfiguration(Project project, int index) {
@@ -79,6 +87,7 @@ class ModuleConfiguration {
         project.dependencies.add(ModitectPlugin.FULL_CONFIGURATION_NAME, notation)
     }
 
+    @InputFile @PathSensitive(PathSensitivity.NONE)
     File getInputJar() {
         if(!primaryConfig) throw new GradleException("No artifact declaration found in $shortName")
         def artifacts = primaryConfig.resolvedConfiguration.resolvedArtifacts
@@ -86,7 +95,17 @@ class ModuleConfiguration {
         artifacts.find { artifact -> !Util.isEmptyJar(artifact.file) }.file
     }
 
-    @Lazy private volatile Set<ResolvedArtifact> moduleArtifacts = { retrieveModuleArtifacts() }()
+    private volatile Set<ResolvedArtifact> cachedModuleArtifacts
+    @Internal Set<ResolvedArtifact> getModuleArtifacts() {
+        if(!cachedModuleArtifacts) {
+            synchronized (this) {
+                if(!cachedModuleArtifacts) {
+                    cachedModuleArtifacts = retrieveModuleArtifacts()
+                }
+            }
+        }
+        cachedModuleArtifacts
+    }
     private Set<ResolvedArtifact> retrieveModuleArtifacts() {
         if(!primaryConfig) throw new GradleException("No artifact declaration found in $shortName")
         def artifacts = primaryConfig.resolvedConfiguration.resolvedArtifacts
@@ -94,7 +113,17 @@ class ModuleConfiguration {
         artifacts
     }
 
-    @Lazy private volatile Set<org.eclipse.aether.graph.Dependency> aetherDependencies = { retrieveAetherDependencies() }()
+    private volatile Set<org.eclipse.aether.graph.Dependency> cachedAetherDependencies
+    @Internal Set<org.eclipse.aether.graph.Dependency> getAetherDependencies() {
+        if(!cachedAetherDependencies) {
+            synchronized (this) {
+                if(!cachedAetherDependencies) {
+                    cachedAetherDependencies = retrieveAetherDependencies()
+                }
+            }
+        }
+        cachedAetherDependencies
+    }
     private Set<org.eclipse.aether.graph.Dependency> retrieveAetherDependencies() {
         def dependencyResolver = Util.getModitectExtension(project).dependencyResolver
         dependencyResolver.getDependencies(primaryDependency.group, primaryDependency.name, primaryDependency.version)
@@ -144,10 +173,12 @@ class ModuleConfiguration {
         Util.executeActionOrClosure(moduleInfo, actionOrClosure)
     }
 
+    @Input
     String getShortName() {
         "module #$index"
     }
 
+    @Input
     Set<ModuleId> getOptionalDependencies() {
         List<ModuleId> moduleIds = moduleArtifacts.collect{ new ModuleId(it.moduleVersion.id.group, it.moduleVersion.id.name) }
         Set<ModuleId> optionalModuleIds = []

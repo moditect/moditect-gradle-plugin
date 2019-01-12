@@ -22,7 +22,9 @@ import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.moditect.commands.AddModuleInfo
 import org.moditect.gradleplugin.Util
@@ -33,16 +35,12 @@ import org.moditect.gradleplugin.common.ModuleId
 class AddDependenciesModuleInfoTask extends AbstractAddModuleInfoTask {
     private static final Logger LOGGER = Logging.getLogger(AddDependenciesModuleInfoTask)
 
-    // TODO - make ModuleConfiguration serializable and annotate with @Input
-    @Internal
+    @Nested
     final Property<ModuleList> modules
 
-    @Internal
-    @Lazy volatile Map<ModuleId, String> assignedNamesByModules = { retrieveAssignedNamesByModules() }()
-
-    @ToString(includeNames = true)
-    static class ModuleList implements Serializable {
-        transient private final Project project
+    static class ModuleList {
+        private final Project project
+        @Nested
         final List<ModuleConfiguration> moduleConfigurations = []
 
         ModuleList(Project project) {
@@ -60,9 +58,9 @@ class AddDependenciesModuleInfoTask extends AbstractAddModuleInfoTask {
             def moduleCfg = new ModuleConfiguration(project, index)
             moduleConfigurations.add(moduleCfg)
 
-            LOGGER.info "Calling action of $moduleCfg.shortName"
+            LOGGER.debug "Calling action of $moduleCfg.shortName"
             Util.executeActionOrClosure(moduleCfg, actionOrClosure)
-            LOGGER.info "moduleCfg #$index: $moduleCfg"
+            LOGGER.debug "moduleCfg #$index: $moduleCfg"
             moduleCfg
         }
     }
@@ -104,6 +102,17 @@ class AddDependenciesModuleInfoTask extends AbstractAddModuleInfoTask {
         }
     }
 
+    private volatile Map<ModuleId, String> cachedAssignedNamesByModules
+    @Internal Map<ModuleId, String> getAssignedNamesByModules () {
+        if(!cachedAssignedNamesByModules) {
+            synchronized (this) {
+                if(!cachedAssignedNamesByModules) {
+                    cachedAssignedNamesByModules = retrieveAssignedNamesByModules()
+                }
+            }
+        }
+        cachedAssignedNamesByModules
+    }
     private Map<ModuleId, String> retrieveAssignedNamesByModules() {
         Map<ModuleId, String> assignedNamesByModule = [:]
         for (ModuleConfiguration moduleCfg : modules.get().moduleConfigurations) {

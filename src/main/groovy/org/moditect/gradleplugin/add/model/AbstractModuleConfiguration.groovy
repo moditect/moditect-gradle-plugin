@@ -19,17 +19,29 @@ import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.common.ModuleId
 import org.moditect.gradleplugin.common.ModuleInfoConfiguration
 
 @CompileStatic
-abstract class AbstractModuleConfiguration implements Serializable {
-    transient protected final Project project
+abstract class AbstractModuleConfiguration {
+    protected final Project project
 
+    @Input @Optional
     ModuleInfoConfiguration moduleInfo
+
+    @InputFile @Optional @PathSensitive(PathSensitivity.NONE)
     File moduleInfoFile
+
+    @Input @Optional
     String moduleInfoSource
+
+    @Input @Optional
     String mainClass
 
     abstract String getShortName()

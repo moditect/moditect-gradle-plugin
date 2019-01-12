@@ -28,6 +28,8 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.moditect.gradleplugin.Util
 import org.moditect.gradleplugin.add.model.AbstractModuleConfiguration
 import org.moditect.model.GeneratedModuleInfo
@@ -39,10 +41,10 @@ import static org.moditect.gradleplugin.Util.createDirectoryProperty
 abstract class AbstractAddModuleInfoTask extends DefaultTask {
     private static final Logger LOGGER = Logging.getLogger(AbstractAddModuleInfoTask)
 
-    @OutputDirectory
+    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
     final DirectoryProperty workingDirectory
 
-    @OutputDirectory
+    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
     final DirectoryProperty outputDirectory
 
     @Internal
