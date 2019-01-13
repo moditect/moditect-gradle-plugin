@@ -24,7 +24,7 @@ dependencies {
 
     implementation "gradle.plugin.com.google.gradle:osdetector-gradle-plugin:1.6.1"
 
-    implementation 'com.github.beryx:moditect:jitpack-SNAPSHOT'
+    implementation 'com.github.moditect:moditect:master-SNAPSHOT'
 
     implementation 'org.apache.maven:maven-aether-provider:3.3.9'
     implementation "org.eclipse.aether:aether-connector-basic:$aetherVersion"
