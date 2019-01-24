@@ -123,7 +123,7 @@ class ModitectExtension {
     }
 
 
-    void addMainModuleInfoData(Action<AddMainModuleInfoTask> action) {
+    void addMainModuleInfo(Action<AddMainModuleInfoTask> action) {
         action.execute(addMainModuleInfoTask)
     }
 

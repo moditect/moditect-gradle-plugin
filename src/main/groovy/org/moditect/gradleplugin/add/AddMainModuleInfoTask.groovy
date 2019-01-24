@@ -54,25 +54,27 @@ class AddMainModuleInfoTask extends AbstractAddModuleInfoTask {
 
     @TaskAction
     void addModuleInfo() {
-        def moduleCfg = mainModule.get()
-        LOGGER.info "Adding moduleInfo to mainModule ${moduleCfg.moduleInfo}"
+        if(mainModule.present) {
+            def moduleCfg = mainModule.get()
+            LOGGER.info "Adding moduleInfo to mainModule ${moduleCfg.moduleInfo}"
 
-        Util.createDirectory(workingDirectory)
-        Util.createDirectory(outputDirectory)
-        Util.createDirectory(tmpDirectory)
+            Util.createDirectory(workingDirectory)
+            Util.createDirectory(outputDirectory)
+            Util.createDirectory(tmpDirectory)
 
-        def inputJar = mainModule.get().inputJar
-        def outputDir = outputDirectory.get().asFile
-        new AddModuleInfo(
-                getModuleInfoSource(moduleCfg),
-                moduleCfg.mainClass,
-                project.version as String,
-                inputJar.toPath(),
-                outputDir.toPath(),
-                jvmVersion.present ? jvmVersion.get() : null,
-                overwriteExistingFiles.get()
-        ).run()
-        copyModularizedJar(outputDir, inputJar)
+            def inputJar = mainModule.get().inputJar
+            def outputDir = outputDirectory.get().asFile
+            new AddModuleInfo(
+                    getModuleInfoSource(moduleCfg),
+                    moduleCfg.mainClass,
+                    project.version as String,
+                    inputJar.toPath(),
+                    outputDir.toPath(),
+                    jvmVersion.present ? jvmVersion.get() : null,
+                    overwriteExistingFiles.get()
+            ).run()
+            copyModularizedJar(outputDir, inputJar)
+        }
     }
 
     @CompileDynamic
