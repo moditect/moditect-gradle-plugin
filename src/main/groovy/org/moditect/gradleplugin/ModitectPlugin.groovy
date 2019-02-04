@@ -64,20 +64,22 @@ class ModitectPlugin implements Plugin<Project> {
         // Configure the following execution order:
         // generateModuleInfo -> addDependenciesModuleInfo -> compileJava -> jar -> addMainModuleInfo -> dist-tasks -> createRuntimeImage
 
-        def jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME)
-        def compileJavaTask = project.tasks.findByName(JavaPlugin.COMPILE_JAVA_TASK_NAME)
+        project.afterEvaluate {
+            def jarTask = project.tasks[JavaPlugin.JAR_TASK_NAME]
+            def compileJavaTask = project.tasks[JavaPlugin.COMPILE_JAVA_TASK_NAME]
 
-        addDependenciesModuleInfoTask.dependsOn(generateModuleInfoTask)
-        compileJavaTask.dependsOn(addDependenciesModuleInfoTask)
+            addDependenciesModuleInfoTask.dependsOn(generateModuleInfoTask)
+            compileJavaTask.dependsOn(addDependenciesModuleInfoTask)
 
-        addMainModuleInfoTask.dependsOn(jarTask)
-        jarTask.finalizedBy(addMainModuleInfoTask)
+            addMainModuleInfoTask.dependsOn(jarTask)
+            jarTask.finalizedBy(addMainModuleInfoTask)
 
-        ['installDist', 'distZip', 'distTar', 'startScripts']
-                .collect { project.tasks.findByName(it) }
-                .findAll { it != null }
-                .each { it.dependsOn addMainModuleInfoTask }
+            ['installDist', 'distZip', 'distTar', 'startScripts']
+                    .collect { project.tasks.findByName(it) }
+                    .findAll { it != null }
+                    .each { it.dependsOn addMainModuleInfoTask }
 
-        createRuntimeImageTask.dependsOn(addMainModuleInfoTask)
+            createRuntimeImageTask.dependsOn(addMainModuleInfoTask)
+        }
     }
 }
