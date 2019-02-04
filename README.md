@@ -4,11 +4,19 @@
 
 # ModiTect Gradle Plugin
 
-This plugin brings [ModiTect](https://github.com/moditect/moditect/blob/master/README.md)'s functionality to Gradle through the following tasks:
-* [generateModuleInfo](#generateModuleInfo)
-* [addMainModuleInfo](#addMainModuleInfo)
-* [addDependenciesModuleInfo](#addDependenciesModuleInfo)
-* [createRuntimeImage](#createRuntimeImage)
+This plugin, which is available in the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/org.moditect.gradleplugin), brings [ModiTect](https://github.com/moditect/moditect/blob/master/README.md)'s functionality to Gradle.
+
+
+* [Tasks](#tasks)
+    * [generateModuleInfo](#generateModuleInfo)
+    * [addMainModuleInfo](#addMainModuleInfo)
+    * [addDependenciesModuleInfo](#addDependenciesModuleInfo)
+    * [createRuntimeImage](#createRuntimeImage)
+
+* [Examples](#examples)
+    * [Hibernate Validator](#validator)
+    * [Undertow](#undertow)
+    * [Vert.x](#vertx)
 
 When applying the plugin, the first three tasks are automatically integrated into the build lifecycle and will be executed during every build.
 The last one, which creates a custom runtime image of your application, should be started explicitly when needed.
@@ -32,8 +40,9 @@ moditect {
 }
 ```
 
+## Tasks
 
-## generateModuleInfo
+### generateModuleInfo
  This task lets you create module-info.java descriptors for given artifacts.
  An example configuration is shown below:
 
@@ -110,7 +119,7 @@ As soon as a dependence is matched by a pattern, the dependence will be added to
     - `uses`: List of names of used services, separated by ";" only required if `addServiceUses` cannot be used due to dynamic invocations of `ServiceLoader#load()`, i.e. no class literal is passed (optional)
 
 
-## addMainModuleInfo
+### addMainModuleInfo
 This task lets you add a module descriptor to the project JAR.
 An example configuration is shown below:
 ```
@@ -150,7 +159,7 @@ The following configuration options exist for the `module` block:
 * `mainClass`: The fully-qualified name of the main class to be added to the module descriptor (optional)
 
 
-## addDependenciesModuleInfo
+### addDependenciesModuleInfo
 This task lets you add module descriptors to existing JAR files.
 An example configuration is shown below:
 ```
@@ -189,7 +198,7 @@ The modularized JARs can be found in the folder given via `outputDirectory`.
 The `jdepsExtraArgs` option can be used to specify a list of arguments passed to the _jdeps_ invocation for creating a "candidate descriptor".
 
 
-## createRuntimeImage
+### createRuntimeImage
 This task lets you create a modular runtime image (see [JEP 220](http://openjdk.java.net/jeps/220)).
 An example configuration is shown below:
 
@@ -235,3 +244,50 @@ Or, if a launcher has been configured:
 ```
 ./<outputDirectory>/bin/<launcherName>
 ```
+
+## Examples
+
+### Hibernate Validator
+
+To create the modular runtime image execute:
+```
+cd integrationtest/hibernate-validator
+../../gradlew clean createRuntime
+```
+
+After that, you can run the modular runtime image by executing:
+```
+build/image/bin/validationTest
+```
+
+
+### Undertow
+
+To create the modular runtime image execute:
+```
+cd integrationtest/undertow
+../../gradlew clean createRuntime
+```
+
+After that, you can run the modular runtime image by executing:
+```
+build/image/bin/helloWorld
+```
+
+Then visit [http://localhost:8080/?name=YourName](http://localhost:8080/?name=YourName) in your browser for the canonical "Hello World" example.
+
+
+### Vert.x
+
+To create the modular runtime image execute:
+```
+cd integrationtest/vert.x
+../../gradlew clean createRuntime
+```
+
+After that, you can run the modular runtime image by executing:
+```
+build/jlink-image/bin/helloWorld
+```
+
+Then visit [http://localhost:8080/?name=YourName](http://localhost:8080/?name=YourName) in your browser for the canonical "Hello World" example.
