@@ -1,0 +1,9 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        jcenter()
+        maven {url "https://jitpack.io"}
+    }
+}
+
+rootProject.name = 'hibernate-validator'

@@ -1,0 +1,11 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {url "https://jitpack.io"}
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'vert.x'
+rootProject.buildFileName = 'build.gradle'

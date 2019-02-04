@@ -1,0 +1,2 @@
+rootProject.name = 'vert.x'
+rootProject.buildFileName = 'build.test.gradle'

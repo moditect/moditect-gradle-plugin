@@ -53,7 +53,7 @@ class ModitectPluginSpec extends Specification {
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
                 .withPluginClasspath()
-                .withArguments(ModitectPlugin.CREATE_RUNTIME_TASK_NAME, '-is')
+                .withArguments("-c", "settings.test.gradle", ModitectPlugin.CREATE_RUNTIME_TASK_NAME, '-is')
                 .build();
         def imageBinDir = new File(testProjectDir.root, 'build/image/bin')
         def launcherExt = OperatingSystem.current.windows ? '.bat' : ''
@@ -89,7 +89,7 @@ class ModitectPluginSpec extends Specification {
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir.root)
                 .withPluginClasspath()
-                .withArguments(ModitectPlugin.CREATE_RUNTIME_TASK_NAME, '-is')
+                .withArguments("-c", "settings.test.gradle", ModitectPlugin.CREATE_RUNTIME_TASK_NAME, '-is')
                 .build();
         def imageBinDir = new File(testProjectDir.root, "build/$imageDir/bin")
         def launcherExt = OperatingSystem.current.windows ? '.bat' : ''
