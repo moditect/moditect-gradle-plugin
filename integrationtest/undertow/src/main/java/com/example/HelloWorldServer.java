@@ -25,7 +25,7 @@ public class HelloWorldServer {
 
     public static void main(final String[] args) {
         Undertow server = Undertow.builder()
-            .addHttpListener( 8080, "0.0.0.0" )
+            .addHttpListener( getPort(), "0.0.0.0" )
             .setHandler( exchange -> {
                 String name = exchange.getQueryParameters()
                     .getOrDefault( "name", new ArrayDeque<>( Collections.singleton( "nameless stranger" ) ) )
@@ -36,5 +36,12 @@ public class HelloWorldServer {
             .build();
 
         server.start();
+        System.out.println("HelloWorldServer successfully started.");
+    }
+
+    public static int getPort() {
+        String sPort = System.getenv("HELLO_SERVER_PORT");
+        int port = (sPort != null) ? Integer.parseInt(sPort) : 8080;
+        return port;
     }
 }

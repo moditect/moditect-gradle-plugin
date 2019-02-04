@@ -22,5 +22,6 @@ public class HelloWorldServer {
     public static void main(final String[] args) {
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle( HelloWorldVerticle.class.getName() );
+        System.out.println("HelloWorldServer successfully started.");
     }
 }

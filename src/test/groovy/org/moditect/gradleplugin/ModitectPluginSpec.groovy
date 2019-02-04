@@ -15,6 +15,8 @@
  */
 package org.moditect.gradleplugin
 
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -24,8 +26,18 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.OperatingSystem
 
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+
 class ModitectPluginSpec extends Specification {
+    private static final Logger LOGGER = Logging.getLogger(ModitectPluginSpec)
+
     @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
+
+    long helloServerStartWaitSeconds = (System.getenv('HELLO_SERVER_START_WAIT_SECONDS') ?: '20') as long
+    int port = (System.getenv('HELLO_SERVER_PORT') ?: '8080') as int
 
     def setUpBuild(String projectDir) {
         new AntBuilder().copy(todir: testProjectDir.root) {
@@ -68,6 +80,9 @@ class ModitectPluginSpec extends Specification {
     
     @Unroll
     def "should create runtime image of #projectName"() {
+        given:
+        Process process = null
+
         when:
         setUpBuild(projectName)
 
@@ -85,10 +100,101 @@ class ModitectPluginSpec extends Specification {
         imageLauncher.exists()
         imageLauncher.canExecute()
 
+        when:
+        process = imageLauncher.absolutePath.execute([], imageBinDir)
+        def appendable = waitUntilOutputContains('HelloWorldServer successfully started',
+                process, helloServerStartWaitSeconds, TimeUnit.SECONDS)
+        LOGGER.info "process output:\n$appendable.delegate"
+
+        then:
+        appendable.containsExpectedText()
+
+        when:
+        def response = "http://localhost:$port?name=moditect".toURL().text
+
+        then:
+        assert response == 'Hello, moditect!'
+
+        cleanup:
+        if(process) {
+            killRecursively(process.toHandle())
+        }
+
         where:
         projectName | imageDir      | launcherName
         'undertow'  | 'image'       | 'helloWorld'
         'vert.x'    | 'jlink-image' | 'helloWorld'
     }
 
+
+
+    private static class SignallingAppendable implements Appendable{
+        final StringBuilder delegate = new StringBuilder(2048)
+        final String expectedText
+        final Lock lock
+        final Condition textDetected
+
+        SignallingAppendable(expectedText, Lock lock, Condition textDetected) {
+            this.expectedText = expectedText
+            this.lock = lock
+            this.textDetected = textDetected
+        }
+
+        @Override
+        Appendable append(CharSequence csq) throws IOException {
+            delegate.append(csq)
+            return this
+        }
+
+        @Override
+        Appendable append(CharSequence csq, int start, int end) throws IOException {
+            delegate.append(csq, start, end)
+            return this
+        }
+
+        @Override
+        Appendable append(char c) throws IOException {
+            delegate.append(c)
+            return this
+        }
+
+        void checkContent() {
+            if(containsExpectedText()) {
+                lock.lock()
+                try {
+                    textDetected.signalAll()
+                } finally {
+                    lock.unlock()
+                }
+            }
+        }
+
+        boolean containsExpectedText() {
+            delegate.contains(expectedText)
+        }
+    }
+
+    private static SignallingAppendable waitUntilOutputContains(String expectedText, Process process, long delay, TimeUnit timeUnit) {
+        def lock = new ReentrantLock()
+        def textDetected = lock.newCondition()
+        def appendable = new SignallingAppendable(expectedText, lock, textDetected)
+        lock.lock()
+        try {
+            process.consumeProcessOutput(appendable, appendable)
+            while(!appendable.containsExpectedText()) {
+                textDetected.await(delay, timeUnit)
+            }
+        } finally {
+            lock.unlock()
+        }
+        appendable
+    }
+
+    private static void killRecursively(ProcessHandle processHandle) {
+        processHandle.descendants().forEach{
+            killRecursively(it)
+        }
+        boolean terminated = processHandle.destroyForcibly()
+        LOGGER.info "Process $processHandle terminated: $terminated"
+    }
 }

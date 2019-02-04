@@ -29,7 +29,7 @@ public class HelloWorldVerticle extends AbstractVerticle {
                 String name = Optional.ofNullable( r.getParam( "name" ) ).orElse( "nameless stranger" );
                 r.response().end ( "Hello, " + name + "!" );
             })
-            .listen( 8080, result -> {
+            .listen( getPort(), result -> {
                 if ( result.succeeded() ) {
                     future.complete();
                 }
@@ -37,5 +37,11 @@ public class HelloWorldVerticle extends AbstractVerticle {
                     future.fail(result.cause());
                 }
             } );
+    }
+
+    public static int getPort() {
+        String sPort = System.getenv("HELLO_SERVER_PORT");
+        int port = (sPort != null) ? Integer.parseInt(sPort) : 8080;
+        return port;
     }
 }
