@@ -276,6 +276,7 @@ build/image/bin/helloWorld
 
 Then visit [http://localhost:8080/?name=YourName](http://localhost:8080/?name=YourName) in your browser for the canonical "Hello World" example.
 
+You can change the port on which the server is listening by setting the value of the environment variable `HELLO_SERVER_PORT`.
 
 ### Vert.x
 
@@ -291,3 +292,5 @@ build/jlink-image/bin/helloWorld
 ```
 
 Then visit [http://localhost:8080/?name=YourName](http://localhost:8080/?name=YourName) in your browser for the canonical "Hello World" example.
+
+You can change the port on which the server is listening by setting the value of the environment variable `HELLO_SERVER_PORT`.
