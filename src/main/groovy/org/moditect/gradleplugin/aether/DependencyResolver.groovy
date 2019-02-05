@@ -76,10 +76,24 @@ class DependencyResolver {
         project.repositories.findAll{it instanceof MavenArtifactRepository}.each { repo ->
             def mavenRepo = (MavenArtifactRepository )repo
             LOGGER.info "$mavenRepo.name ($mavenRepo.url): $mavenRepo.artifactUrls"
-            repos << new RemoteRepository.Builder( mavenRepo.name, 'default', mavenRepo.url.toString() ).build()
+            def url = mavenRepo.url.toString()
+            def builder = new RemoteRepository.Builder(mavenRepo.name, 'default', url)
+            builder.proxy = getProxy(url)
+            repos << builder.build()
         }
         repos
     }
+
+    private static org.eclipse.aether.repository.Proxy getProxy ( final String url ) {
+        def urlProxy = ProxySelector.default?.select (URI.create(url))?.find { proxy ->
+            if(proxy.type() != Proxy.Type.HTTP) return false
+            return (proxy.address() instanceof InetSocketAddress)
+        }
+        if(!urlProxy) return null
+        def inetAddress = ((InetSocketAddress)urlProxy.address())
+        return new org.eclipse.aether.repository.Proxy(org.eclipse.aether.repository.Proxy.TYPE_HTTP, inetAddress.hostString, inetAddress.port)
+    }
+
 
     private static Set<Dependency> collectDependencies(DependencyNode node) {
         Set<Dependency> deps = []
