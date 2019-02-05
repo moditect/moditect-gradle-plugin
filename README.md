@@ -14,7 +14,7 @@ This plugin, which is available in the [Gradle Plugin Portal](https://plugins.gr
     * [createRuntimeImage](#createRuntimeImage)
 
 * [Examples](#examples)
-    * [Hibernate Validator](#validator)
+    * [Hibernate Validator](#hibernate-validator)
     * [Undertow](#undertow)
     * [Vert.x](#vertx)
 
