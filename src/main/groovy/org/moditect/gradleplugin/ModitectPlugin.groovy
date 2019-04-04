@@ -18,6 +18,7 @@ package org.moditect.gradleplugin
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPlugin
 import org.moditect.gradleplugin.add.AddDependenciesModuleInfoTask
 import org.moditect.gradleplugin.add.AddMainModuleInfoTask
@@ -67,6 +68,13 @@ class ModitectPlugin implements Plugin<Project> {
         project.afterEvaluate {
             def jarTask = project.tasks[JavaPlugin.JAR_TASK_NAME]
             def compileJavaTask = project.tasks[JavaPlugin.COMPILE_JAVA_TASK_NAME]
+
+            compileJavaTask.taskDependencies.getDependencies(compileJavaTask).each { Task depTask ->
+                def depJarTask = depTask.project.tasks.findByName(JavaPlugin.JAR_TASK_NAME)
+                [addMainModuleInfoTask, addDependenciesModuleInfoTask, generateModuleInfoTask, createRuntimeImageTask].each {
+                    it.dependsOn(depJarTask)
+                }
+            }
 
             addDependenciesModuleInfoTask.dependsOn(generateModuleInfoTask)
             compileJavaTask.dependsOn(addDependenciesModuleInfoTask)
