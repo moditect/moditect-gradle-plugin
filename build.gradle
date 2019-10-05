@@ -31,7 +31,7 @@ dependencies {
 
     implementation "gradle.plugin.com.google.gradle:osdetector-gradle-plugin:1.6.1"
 
-    implementation 'com.github.moditect:moditect:master-SNAPSHOT'
+    implementation 'com.github.moditect:moditect:7976363'
 
     implementation 'org.apache.maven:maven-aether-provider:3.3.9'
     implementation "org.eclipse.aether:aether-connector-basic:$aetherVersion"
