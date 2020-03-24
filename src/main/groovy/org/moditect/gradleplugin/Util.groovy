@@ -93,7 +93,9 @@ class Util {
                 DependencePattern.parsePatterns(moduleInfo.requires),
                 workingDirectory.toPath(),
                 outputDirectory.toPath(),
+                moduleInfo.opensResourcesAsSet,
                 moduleInfo.usesAsSet,
+                moduleInfo.providesAsSet,
                 moduleInfo.addServiceUses,
                 jdepsExtraArgs,
                 new ModitectLog()

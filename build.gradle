@@ -15,7 +15,6 @@ buildScan {
 repositories {
     jcenter()
     gradlePluginPortal()
-    maven { url 'https://jitpack.io' }
 }
 
 sourceCompatibility = 1.8
@@ -31,7 +30,7 @@ dependencies {
 
     implementation "gradle.plugin.com.google.gradle:osdetector-gradle-plugin:1.6.1"
 
-    implementation 'com.github.moditect:moditect:7976363'
+    implementation 'org.moditect:moditect:1.0.0.RC1'
 
     implementation 'org.apache.maven:maven-aether-provider:3.3.9'
     implementation "org.eclipse.aether:aether-connector-basic:$aetherVersion"

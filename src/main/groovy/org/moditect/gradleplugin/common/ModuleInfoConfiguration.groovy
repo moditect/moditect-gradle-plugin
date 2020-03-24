@@ -25,11 +25,21 @@ class ModuleInfoConfiguration implements Serializable {
     String exports = "*;"
     String opens = "!*;"
     String uses
+    String opensResources
+    String provides
     String name
     boolean addServiceUses
     boolean open
 
     Set<String> getUsesAsSet() {
         (uses ? uses.split(';').collect { it.trim() }.findAll { it } : []) as Set
+    }
+
+    Set<String> getOpensResourcesAsSet() {
+        (opensResources ? opensResources.split(';').collect { it.trim() }.findAll { it } : []) as Set
+    }
+
+    Set<String> getProvidesAsSet() {
+        (provides ? provides.split(';').collect { it.trim() }.findAll { it } : []) as Set
     }
 }

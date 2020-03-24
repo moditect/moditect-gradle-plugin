@@ -110,6 +110,12 @@ added to the list of open packages and no further patterns will be applied. As s
 as a package is matched by an exclusive pattern, this package will not be added to the
 list of open packages and no further patterns will be applied.
 (optional; the default value is "!\*;", i.e. no packages will be opened)
+    - `opensResources`: List of package names only containing resources as png, css or mp3 files
+                        i.e. everything not being java files, separated by ";". For JavaFX 9+, it is required to force
+                        open resource-only packages. Please, refer to https://github.com/javafxports/openjdk-jfx/issues/441
+                        for more details. `opensResources` allows to do this. Contrary to `opens`, `opensResources`
+                        cannot accept patterns because Moditect manages patterns using a technical solution that can
+                        only work with compiled java classes. Hence, each resource-only package must be declared one by one.
     - `requires`: List of name patterns for describing the dependences of the module,
   based on the automatically determined dependences.
 Patterns are inclusive or exclusive (starting with "!") and may contain the "\*" character as a wildcard.
@@ -117,6 +123,7 @@ Inclusive patterns may contain the `static` and `transitive` modifiers, in which
 As soon as a dependence is matched by a pattern, the dependence will be added to the list of dependences (if the pattern is inclusive) or the dependence will be filtered out (for exclusive patterns) and no further patterns will be applied. Usually, only a few dependences will be given explicitly in order to override their modifiers, followed by a `*;` pattern to add all remaining automatically determined dependences.
     - `addServiceUses`: If `true`, the given artifact will be scanned for usages of `ServiceLoader#load()` and if usages passing a class literal are found (`load( MyService.class )`), an equivalent `uses()` clause will be added to the generated descriptor; usages of `load()` where a non-literal class object is passed, are ignored (optional, defaults to `false`)
     - `uses`: List of names of used services, separated by ";" only required if `addServiceUses` cannot be used due to dynamic invocations of `ServiceLoader#load()`, i.e. no class literal is passed (optional)
+    - `provides`: List of services with their provided service implementations, separated by ";". A service and its implementation must be separated by the keyword "with" e.g. `serviceX with implementationX; serviceY with implementationY;`. If the module implements a particular service through several service implementations, those implementation classes must be separated by "," e.g. `myService with implementation1, implementation2, implementation3;`.
 
 
 ### addMainModuleInfo
@@ -229,6 +236,8 @@ be added to the image (required)
 * `launcher`: file name and main module for creating a launcher file (optional)
 * `stripDebug` whether to strip debug symbols or not (optional, defaults to `false`)
 * `excludedResources` list of patterns for excluding matching resources from the created runtime image
+* `noHeaderFiles` no native header files will be added (optional, defaults to `false`)
+* `noManPages` no man pages will be added (optional, defaults to `false`)
 * `jdkHome`: the path to the JDK whose jmod files will be used when creating the runtime image (optional; if not given the JDK running the
 current build will be used).
 * `ignoreSigningInformation`: Suppresses a fatal error when signed modular JARs are linked in the runtime image. The signature-related files of the signed modular JARs aren’t copied to the runtime image.

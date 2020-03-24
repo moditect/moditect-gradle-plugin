@@ -69,6 +69,12 @@ class CreateRuntimeImageTask extends DefaultTask {
     @Input
     final Property<Boolean> ignoreSigningInformation
 
+    @Input
+    final Property<Boolean> noHeaderFiles
+
+    @Input
+    final Property<Boolean> noManPages
+
     static class Launcher implements Serializable {
         String name;
         String module;
@@ -99,6 +105,12 @@ class CreateRuntimeImageTask extends DefaultTask {
 
         ignoreSigningInformation = project.objects.property(Boolean)
         ignoreSigningInformation.set(false)
+
+        noHeaderFiles = project.objects.property(Boolean)
+        noHeaderFiles.set(false)
+
+        noManPages = project.objects.property(Boolean)
+        noManPages.set(false)
     }
 
     @TaskAction
@@ -118,7 +130,9 @@ class CreateRuntimeImageTask extends DefaultTask {
                 stripDebug.get(),
                 ignoreSigningInformation.get(),
                 excludedResources.get() as List<String>,
-                new ModitectLog()
+                new ModitectLog(),
+                noHeaderFiles.get(),
+                noManPages.get()
         ).run();
     }
 
