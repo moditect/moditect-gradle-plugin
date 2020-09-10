@@ -15,6 +15,7 @@
  */
 package org.moditect.gradleplugin.aether
 
+
 import groovy.transform.CompileStatic
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.eclipse.aether.RepositorySystem
@@ -24,6 +25,7 @@ import org.eclipse.aether.collection.CollectRequest
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
 import org.eclipse.aether.graph.Dependency
 import org.eclipse.aether.graph.DependencyNode
+import org.eclipse.aether.impl.DefaultServiceLocator
 import org.eclipse.aether.repository.LocalRepository
 import org.eclipse.aether.repository.RemoteRepository
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory
@@ -33,6 +35,7 @@ import org.eclipse.aether.transport.http.HttpTransporterFactory
 import org.eclipse.aether.util.graph.selector.AndDependencySelector
 import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector
 import org.eclipse.aether.util.graph.selector.ScopeDependencySelector
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.logging.Logger
@@ -108,15 +111,24 @@ class DependencyResolver {
 
     private static RepositorySystem newRepositorySystem() {
         def locator = MavenRepositorySystemUtils.newServiceLocator()
+        locator.setErrorHandler(new DefaultServiceLocator.ErrorHandler() {
+            @Override
+            public void serviceCreationFailed(Class<?> type, Class<?> impl, Throwable exception) {
+                LOGGER.error("ServiceLocator failed", exception)
+            }
+        });
         locator.addService( RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory )
         locator.addService( TransporterFactory.class, FileTransporterFactory )
         locator.addService( TransporterFactory.class, HttpTransporterFactory )
-        return locator.getService( RepositorySystem )
+        def repoSystem = locator.getService( RepositorySystem )
+        if(!repoSystem) {
+            throw new GradleException("Cannot locate the RepositorySystem")
+        }
+        return repoSystem
     }
 
     private static RepositorySystemSession newSession(RepositorySystem system ) {
         def session = MavenRepositorySystemUtils.newSession();
-
         def localRepo = new LocalRepository( "build/local-repo" );
         session.localRepositoryManager = system.newLocalRepositoryManager( session, localRepo )
         session.dependencySelector = new AndDependencySelector(

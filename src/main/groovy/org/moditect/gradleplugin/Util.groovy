@@ -16,6 +16,7 @@
 package org.moditect.gradleplugin
 
 import com.google.gradle.osdetector.OsDetector
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.GradleException
@@ -45,6 +46,7 @@ import java.util.zip.ZipFile
 class Util {
     private static final Logger LOGGER = Logging.getLogger(Util)
 
+    @CompileDynamic
     static DirectoryProperty createDirectoryProperty(Project project) {
         if(GradleVersion.current() < GradleVersion.version('5.0-milestone-1')) {
             return project.layout.directoryProperty()
@@ -52,6 +54,7 @@ class Util {
             return project.objects.directoryProperty()
         }
     }
+    @CompileDynamic
     static RegularFileProperty createRegularFileProperty(Project project) {
         if(GradleVersion.current() < GradleVersion.version('5.0-milestone-1')) {
             return project.layout.fileProperty()

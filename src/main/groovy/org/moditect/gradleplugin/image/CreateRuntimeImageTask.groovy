@@ -45,10 +45,10 @@ class CreateRuntimeImageTask extends DefaultTask {
     @Input @Optional
     final Property<String> jdkHome
 
-    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
+    @OutputDirectory
     final DirectoryProperty outputDirectory
 
-    @Classpath @PathSensitive(PathSensitivity.RELATIVE)
+    @Classpath
     final ListProperty<File> modulePath
 
     @Input

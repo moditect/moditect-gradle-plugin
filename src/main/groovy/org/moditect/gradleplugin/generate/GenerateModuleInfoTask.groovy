@@ -35,10 +35,10 @@ import static org.moditect.gradleplugin.Util.createDirectoryProperty
 class GenerateModuleInfoTask extends DefaultTask {
     private static final Logger LOGGER = Logging.getLogger(GenerateModuleInfoTask)
 
-    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
+    @OutputDirectory
     final DirectoryProperty workingDirectory
 
-    @OutputDirectory @PathSensitive(PathSensitivity.RELATIVE)
+    @OutputDirectory
     final DirectoryProperty outputDirectory
 
     @Input @Optional
