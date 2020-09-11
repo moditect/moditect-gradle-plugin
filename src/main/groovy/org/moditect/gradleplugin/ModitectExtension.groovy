@@ -32,6 +32,9 @@ import org.moditect.gradleplugin.generate.GenerateModuleInfoTask
 import org.moditect.gradleplugin.image.CreateRuntimeImageTask
 import org.moditect.model.DependencyDescriptor
 
+import java.lang.module.FindException
+import java.util.function.Supplier
+
 import static org.moditect.gradleplugin.Util.createDirectoryProperty
 
 @CompileStatic
@@ -102,20 +105,31 @@ class ModitectExtension {
 
         Set<ArtifactDescriptor> descriptors = []
         cfg.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-            String autoModuleName = DependencyDescriptor.getAutoModuleNameFromInputJar(artifact.file.toPath(), null);
+            String autoModuleName = null
+            try {
+                autoModuleName = DependencyDescriptor.getAutoModuleNameFromInputJar(artifact.file.toPath(), null)
+            } catch (NoClassDefFoundError ncdfe) {
+                if(ncdfe.message?.contains('FindException')) {
+                    LOGGER.info "Cannot get AutoModuleName of $artifact.file.name using Java < 9"
+                } else {
+                    throw ncdfe
+                }
+            }
             def info = artifact.moduleVersion.id
-            File inputJar
+            Supplier<File> inputJarProvider
             if (autoModuleName != null) {
-                inputJar = artifact.file
+                inputJarProvider = { artifact.file }
             } else {
                 String moduleName = assignedNamesByModules.get(new ModuleId(info.group, info.name))
-                inputJar = GenerateModuleInfo.createCopyWithAutoModuleNameManifestHeader(
+                inputJarProvider = {
+                    GenerateModuleInfo.createCopyWithAutoModuleNameManifestHeader(
                         workingDirectory.get().asFile.toPath(),
                         artifact.file.toPath(),
                         moduleName
-                ).toFile()
+                    ).toFile()
+                }
             }
-            descriptors.add(new ArtifactDescriptor(info.group, info.name, inputJar))
+            descriptors.add(new ArtifactDescriptor(info.group, info.name, inputJarProvider))
         }
         LOGGER.info "assignedNamesByModules: ${assignedNamesByModules.collect {'\n\t' + it}}"
         LOGGER.info "artifactDescriptors: ${descriptors.collect {'\n\t' + it}}"

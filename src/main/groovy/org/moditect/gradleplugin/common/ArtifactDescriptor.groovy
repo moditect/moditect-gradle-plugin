@@ -16,12 +16,23 @@
 package org.moditect.gradleplugin.common
 
 import groovy.transform.Canonical
+import groovy.transform.ToString
+
+import java.util.function.Supplier
 
 @Canonical
+@ToString(excludes = ['file', 'fileProvider'])
 class ArtifactDescriptor {
-    String group
-    String name
-    File file
+    final String group
+    final String name
+    final Supplier<File> fileProvider
+    @Lazy volatile File file = { fileProvider.get() }()
+
+    ArtifactDescriptor(String group, String name, Supplier<File> fileProvider) {
+        this.group = group
+        this.name = name
+        this.fileProvider = fileProvider
+    }
 
     boolean equals(o) {
         if (this.is(o)) return true
