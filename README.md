@@ -1,4 +1,4 @@
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/moditect/moditect-gradle-plugin/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/travis/moditect/moditect-gradle-plugin/master.svg?label=Build)](https://travis-ci.org/moditect/moditect-gradle-plugin)
 
@@ -46,7 +46,7 @@ moditect {
  This task lets you create module-info.java descriptors for given artifacts.
  An example configuration is shown below:
 
-```
+```groovy
 generateModuleInfo {
     jdepsExtraArgs = ['-q']
     outputDirectory = file("$buildDir/generated-sources/modules")
@@ -77,9 +77,9 @@ generateModuleInfo {
 
 This will generate a module descriptor at _build/generated-sources/modules/com.example.core/module-info.java_.
 
-* jdepsExtraArgs : A list of arguments passed to the _jdeps_ invocation for creating a "candidate descriptor" (optional)
+* `jdepsExtraArgs` : A list of arguments passed to the [_jdeps_ invocation](https://docs.oracle.com/en/java/javase/11/tools/jdeps.html) for creating a "candidate descriptor" (optional)
 
-* outputDirectory: Directory in which the module descriptors will be generated (optional; default value: _build/generated-sources/modules_)
+* `outputDirectory`: Directory in which the module descriptors will be generated (optional; default value: _build/generated-sources/modules_)
 
 * For each module to be processed, the following configuration options exist:
 
@@ -129,10 +129,10 @@ As soon as a dependence is matched by a pattern, the dependence will be added to
 ### addMainModuleInfo
 This task lets you add a module descriptor to the project JAR.
 An example configuration is shown below:
-```
+```groovy
 addMainModuleInfo {
     version = project.version
-    jvmVersio = 11
+    jvmVersion = 11
     overwriteExistingFiles = false
     jdepsExtraArgs = ['-q']
     module {
@@ -155,7 +155,8 @@ The special value `base` (the default) can be used to add the descriptor to the 
 Putting the descriptor under `META-INF/versions` can help to increase compatibility with older libraries scanning class files that may fail when encountering the `module-info.class` file
 (as chances are lower that such tool will look for class files under `META-INF/versions/...`).
 
-The `jdepsExtraArgs` option can be used to specify a list of arguments passed to the _jdeps_ invocation for creating a "candidate descriptor".
+The existing JAR will be modularized and a copy of this modularized JAR can be found in the folder given via `outputDirectory`. If `overwriteExistingFiles` is `true`, existing files in the output directory will be overwritten; if `false` (the default) the task will fail if the output file already exists.
+The `jdepsExtraArgs` option can be used to specify a list of arguments passed to the [_jdeps_ invocation](https://docs.oracle.com/en/java/javase/11/tools/jdeps.html) for creating a "candidate descriptor".
 
 The following configuration options exist for the `module` block:
 
@@ -169,10 +170,11 @@ The following configuration options exist for the `module` block:
 ### addDependenciesModuleInfo
 This task lets you add module descriptors to existing JAR files.
 An example configuration is shown below:
-```
+```groovy
 addDependenciesModuleInfo {
     jdepsExtraArgs = ['-q']
     outputDirectory = file("$buildDir/modules")
+    overwriteExistingFiles = false
     modules {
         module {
             artifact 'com.example:example-core:1.0.0.Final'
@@ -201,15 +203,15 @@ For each module to be processed, the following configuration options exist:
 * `version`: The version to be added to the module descriptor; if not given and
 `artifact` is given, the artifact's version will be used; otherwise no version will be added (optional)
 
-The modularized JARs can be found in the folder given via `outputDirectory`.
-The `jdepsExtraArgs` option can be used to specify a list of arguments passed to the _jdeps_ invocation for creating a "candidate descriptor".
+The modularized JARs can be found in the folder given via `outputDirectory`. If `overwriteExistingFiles` is `true`, existing files in the output directory will be overwritten; if `false` (the default) the task will fail if the output files already exist.
+The `jdepsExtraArgs` option can be used to specify a list of arguments passed to the [_jdeps_ invocation](https://docs.oracle.com/en/java/javase/11/tools/jdeps.html) for creating a "candidate descriptor".
 
 
 ### createRuntimeImage
-This task lets you create a modular runtime image (see [JEP 220](http://openjdk.java.net/jeps/220)).
+This task lets you create a modular runtime image (see [JEP 220](https://openjdk.java.net/jeps/220)).
 An example configuration is shown below:
 
-```
+```groovy
 createRuntimeImage {
     jdkHome = '/usr/lib/jvm/jdk_x64_linux_hotspot_11_28'
     outputDirectory = file("$buildDir/jlink-image")
