@@ -22,6 +22,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.WorkResult
@@ -33,7 +34,7 @@ import org.moditect.gradleplugin.add.model.MainModuleConfiguration
 class AddMainModuleInfoTask extends AbstractAddModuleInfoTask {
     private static final Logger LOGGER = Logging.getLogger(AddMainModuleInfoTask)
 
-    @Input @Optional
+    @Nested @Optional
     final Property<MainModuleConfiguration> mainModule
 
     AddMainModuleInfoTask() {
