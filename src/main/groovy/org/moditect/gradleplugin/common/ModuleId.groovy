@@ -16,9 +16,12 @@
 package org.moditect.gradleplugin.common
 
 import groovy.transform.Canonical
+import org.gradle.api.tasks.Input
 
 @Canonical
 class ModuleId implements Serializable {
+    @Input
     String group
+    @Input
     String name
 }

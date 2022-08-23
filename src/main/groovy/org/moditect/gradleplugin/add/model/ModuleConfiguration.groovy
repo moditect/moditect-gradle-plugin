@@ -100,7 +100,6 @@ class ModuleConfiguration extends AbstractModuleConfiguration {
         primaryArtifact.file
     }
 
-    @Input
     @Override
     String getVersion() {
         primaryArtifact.moduleVersion.id.version
